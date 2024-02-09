@@ -1,0 +1,88 @@
+1) select COUNT(*) as [Count] from Verbali 
+
+2) select N.Nome, N.Cognome, COUNT(*) as [Count] 
+from Verbali V inner join Anagrafica N
+on V.Nominativo = N.id
+group by N.Nome, N.Cognome
+
+3) select T.Descrizione, COUNT(*) as [Count] 
+from Verbali V inner join [Tipo Violazione] T
+on V.TipoViolazione = T.id
+group by T.Descrizione
+
+4) select N.Nome, N.Cognome, sum(DecurtamentoPunti) as [Totale Punti Decurtati] 
+from Verbali V inner join Anagrafica N
+on V.Nominativo = N.id
+group by N.Nome, N.Cognome
+
+5) select N.Nome, N.Cognome, V.DataViolazione as [Data Violazione], V.IndirizzoViolazione as [Indirizzo Violazione], V.Importo, V.DecurtamentoPunti as [Punti Decurtati] 
+from Verbali V inner join Anagrafica N
+on V.Nominativo = N.id
+group by N.Nome, N.Cognome, V.DataViolazione, V.IndirizzoViolazione , V.Importo, V.DecurtamentoPunti
+
+6) select N.Nome, N.Cognome, N.Indirizzo, V.DataViolazione as [Data Violazione], V.Importo, V.DecurtamentoPunti as [Punti Decurtati]
+from Verbali V inner join Anagrafica N
+on V.Nominativo = N.id
+where V.DataTrascrizioneVerbale between '2009-02-01' and '2009-07-01'
+group by N.Nome, N.Cognome, N.Indirizzo, V.DataViolazione, V.Importo, V.DecurtamentoPunti
+
+7) select N.Nome, N.Cognome, sum(V.Importo)
+from Verbali V inner join Anagrafica N
+on V.Nominativo = N.id
+group by N.Nome, N.Cognome
+
+8) select * from Anagrafica
+where Città = 'Palermo'
+
+9) // dichiarazione di una variabile, ad esempio @parameter = '2005-11-11', darà il risultato sperato
+declare @parameter datetime
+
+select DataViolazione, Importo, DecurtamentoPunti from Verbali
+where DataViolazione = @parameter
+
+10) select a.Nome, a.Cognome, count(*) as [Verbali]
+from Verbali v  inner join NominativiAgente a
+on a.id = v.NominativoAgente
+group by a.Nome, a.Cognome
+
+11) select A.Nome, A.Cognome, A.Indirizzo, V.DataViolazione as [Data Violazione], V.Importo, V.DecurtamentoPunti as [Punti decurtati]
+from Verbali V inner join Anagrafica A
+on V.Nominativo = A.id
+where V.DecurtamentoPunti > 5
+
+12) select A.Nome, A.Cognome, A.Indirizzo, V.DataViolazione as [Data Violazione], V.Importo, V.DecurtamentoPunti as [Punti decurtati]
+from Verbali V inner join Anagrafica A
+on V.Nominativo = A.id
+where Importo > 400
+
+2-1) CREATE PROCEDURE ControllaVerbaliPerAnno @anno char(4)
+
+AS
+
+BEGIN
+select  *
+
+from Verbali
+
+where DataViolazione >= cast((@anno + '0101') as date) and DataViolazione < DATEADD(year, 1, cast((@anno + '0101') as date))
+
+END
+GO
+
+------------------------------
+exec ControllaVerbaliPerAnno @anno = '2004'
+
+2-2) create procedure ControllaPuntiPerData @data date 
+as
+select DataViolazione as [Data], count(DecurtamentoPunti) as [Totale punti decurtati]
+from Verbali
+where @data = DataViolazione
+
+exec ControllaPuntiPerData '2009-02-02'
+
+2-3) create procedure CancellaVerbale @id int 
+as
+delete from Verbali
+where id = @id
+
+exec CancellaVerbale @id = 11
